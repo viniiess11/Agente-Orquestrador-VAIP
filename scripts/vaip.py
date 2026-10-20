@@ -150,11 +150,15 @@ def sync_upstream():
 
 
 def create_branch(name: str, author: str = "vinii", btype: str = "feat"):
-    """Cria e muda para uma nova branch padronizada, impedindo trabalho na main."""
+    """Cria e muda para uma nova branch padronizada, garantindo partir da main atualizada."""
+    print("[*] Passo 1: Atualizando a branch main antes de iniciar qualquer código...")
+    os.system("git checkout main")
+    os.system("git pull origin main")
+
     clean_name = name.strip().lower().replace(" ", "-").replace("_", "-")
     branch_name = f"{btype}/{author}-{clean_name}"
     
-    print(f"[*] Criando e alternando para a branch: {branch_name}...")
+    print(f"[*] Passo 2: Criando e alternando para a branch: {branch_name}...")
     res = os.system(f"git checkout -b {branch_name}")
     if res == 0:
         print(f"[+] Sucesso! Você está trabalhando na branch '{branch_name}'.")

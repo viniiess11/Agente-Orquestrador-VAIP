@@ -6,7 +6,7 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![CI/CD GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF.svg?logo=github-actions&logoColor=white)](https://github.com/features/actions)
 [![Discord Integration](https://img.shields.io/badge/Alerts-Discord_Webhook-5865F2.svg?logo=discord&logoColor=white)](https://discord.com/)
-[![Zero-Leak Security](https://img.shields.io/badge/Security-Zero--Leak%20Policy-success.svg?logo=shield&logoColor=white)](#-seguran%C3%A7a-e-governan%C3%A7a-zero-leak)
+[![Zero-Leak Security](https://img.shields.io/badge/Security-Zero--Leak%20Policy-success.svg?logo=shield&logoColor=white)](#-segurança-e-governança-zero-leak)
 [![Status](https://img.shields.io/badge/Status-Produção%20Ativa-brightgreen.svg)](#-projetos-orquestrados)
 
 <p align="center">
@@ -92,6 +92,7 @@ Agente-Orquestrador-VAIP/
 │   ├── job_hunter_spec.md       # Especificação técnica do subagente de vagas
 │   └── dark_channel_spec.md     # Especificação técnica do subagente de canais dark
 ├── scripts/
+│   ├── vaip.py                  # CLI Master de governança, branches e PRs
 │   ├── search_jobs.py           # Motor de busca e parametrização de links por região
 │   ├── notify.py                # Integração e disparo de Embeds ricos para o Discord
 │   ├── daily_runner.py          # Runner unificado de orquestração diária
@@ -109,7 +110,7 @@ Agente-Orquestrador-VAIP/
 
 ### 1. Clonar o Repositório
 ```bash
-git clone https://github.com/patrikesiqueira93/Agente-Orquestrador-VAIP.git
+git clone https://github.com/viniiess11/Agente-Orquestrador-VAIP.git
 cd Agente-Orquestrador-VAIP
 ```
 
@@ -122,7 +123,37 @@ cp .env.example .env
 ### 3. Rodar a Varredura de Vagas Manualmente
 ```bash
 python scripts/daily_runner.py
+# ou via orquestrador:
+python scripts/vaip.py run PRJ-01
 ```
+
+---
+
+## 🤝 Fluxo de Trabalho Paralelo (Vinícius & Patrik)
+
+Para que ambos trabalhem em paralelo em suas respectivas casas sem sobrescrever código ou gerar conflitos:
+
+1. **Antes de Iniciar Qualquer Código:**  
+   Rode sempre:
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+   *Isso garante 100% de certeza de que você está partindo da versão mais recente do projeto.*
+
+2. **Crie uma Branch para Cada Funcionalidade (Nunca comite na `main`):**
+   ```bash
+   python scripts/vaip.py branch minha-tarefa
+   # ou manualmente: git checkout -b feat/vinii-minha-tarefa
+   ```
+
+3. **Abra um Pull Request:**
+   ```bash
+   python scripts/vaip.py pr
+   ```
+
+4. **Se Ocorrer Conflito no Git:**  
+   Se vocês alterarem exatamente a mesma linha do mesmo arquivo, o Git avisará no Pull Request. Vocês só precisarão abrir o arquivo localmente, escolher qual trecho manter e fazer o commit de resolução.
 
 ---
 
