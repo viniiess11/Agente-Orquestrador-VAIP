@@ -25,8 +25,8 @@ def run_daily_hunt():
     # 2. Obter links formatados
     links = generate_search_links()
     
-    # 3. Disparar para o Discord
-    success = send_discord_report(links)
+    # 3. Disparar para o Discord (com o arquivo .md anexado)
+    success = send_discord_report(links, file_path=report_file)
     
     # 4. Atualizar o Ledger de Estado
     base_dir = os.path.dirname(current_dir)

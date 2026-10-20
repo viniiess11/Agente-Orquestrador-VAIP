@@ -1,10 +1,13 @@
-name: VAIP Daily Job Hunter (Nuvem 100% Grátis)
+name: VAIP Daily Job Hunter (Nuvem 100% Autonoma)
 
 on:
   schedule:
-    # 20:30 UTC = 17:30 Horário de Brasília (BRT) todo dia
+    # 20:30 UTC = 17:30 Horário de Brasília (BRT) todos os dias
     - cron: '30 20 * * *'
-  workflow_dispatch: # Permite disparar manualmente pelo botão no GitHub quando quiser
+  workflow_dispatch: # Permite disparar manualmente a qualquer momento pelo GitHub
+
+permissions:
+  contents: write
 
 jobs:
   run-job-hunter:
@@ -18,26 +21,18 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Executar Varredura de Vagas
-        run: |
-          python scripts/search_jobs.py
-
-      - name: Disparar Alerta para Discord/Telegram
+      - name: Executar VAIP Hunter e Disparar para Discord (com Anexo)
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          python -c "
-          from scripts.notify import send_discord_message, send_telegram_message
-          import os
-          from datetime import datetime
+          python scripts/daily_runner.py
 
-          today = datetime.now().strftime('%Y-%m-%d')
-          msg = f'🎯 **VAIP Hunter**: O relatório diário de vagas de dados ({today}) para Mogi das Cruzes, Alto Tietê e Remoto foi atualizado!'
-          
-          if os.environ.get('DISCORD_WEBHOOK_URL'):
-              send_discord_message(msg)
-          if os.environ.get('TELEGRAM_BOT_TOKEN'):
-              send_telegram_message(msg)
-          "
+      - name: Versionar Relatório e Estado no Repositório
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ ledger/state.json
+          git commit -m "chore(auto): relatorio de vagas $(date +'%Y-%m-%d') [skip ci]" || echo "Sem alteracoes para commitar"
+          git push || echo "Aviso: Nao foi possivel dar push (verificar permissoes de escrita do workflow)"
