@@ -90,7 +90,10 @@ def generate_search_links():
     
     return links
 
-def export_daily_report(output_dir="data"):
+def export_daily_report(output_dir=None):
+    if output_dir is None:
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_dir = os.path.join(base_dir, "data")
     """Gera o arquivo Markdown diário com as oportunidades e links."""
     os.makedirs(output_dir, exist_ok=True)
     today_str = datetime.now().strftime("%Y-%m-%d")
