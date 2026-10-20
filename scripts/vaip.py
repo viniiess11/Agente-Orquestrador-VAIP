@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import argparse
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -114,7 +115,6 @@ def register_project(name: str, slug: str, description: str):
     state = load_state()
     projects = state.setdefault("projects", {})
 
-    # Gera próximo ID: PRJ-03, PRJ-04, etc.
     existing_nums = [int(p.split("-")[1]) for p in projects.keys() if p.startswith("PRJ-") and p.split("-")[1].isdigit()]
     next_num = max(existing_nums, default=0) + 1
     new_id = f"PRJ-{next_num:02d}"
@@ -149,6 +149,76 @@ def sync_upstream():
         print("[!] Não foi possível conectar ao upstream. Verifique sua conexão ou se o remote está configurado.")
 
 
+def create_branch(name: str, author: str = "vinii", btype: str = "feat"):
+    """Cria e muda para uma nova branch padronizada, impedindo trabalho na main."""
+    clean_name = name.strip().lower().replace(" ", "-").replace("_", "-")
+    branch_name = f"{btype}/{author}-{clean_name}"
+    
+    print(f"[*] Criando e alternando para a branch: {branch_name}...")
+    res = os.system(f"git checkout -b {branch_name}")
+    if res == 0:
+        print(f"[+] Sucesso! Você está trabalhando na branch '{branch_name}'.")
+        print("    Todas as suas modificações agora estão isoladas e não afetarão a 'main'.")
+    else:
+        print(f"[!] Falha ao criar a branch '{branch_name}'. Verifique o git status.")
+
+
+def create_pr(title: str = None, body: str = None):
+    """Faz o push da branch atual e abre um Pull Request no GitHub."""
+    try:
+        current_branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True
+        ).strip()
+    except Exception as e:
+        print(f"[!] Erro ao detectar branch atual: {e}")
+        return
+
+    if current_branch in ["main", "master"]:
+        print("[!] Você está na branch 'main'! Pull Requests devem ser criados a partir de uma branch de feature.")
+        return
+
+    print(f"[*] Fazendo push da branch '{current_branch}' para origin...")
+    push_res = os.system(f"git push -u origin {current_branch}")
+    if push_res != 0:
+        print("[!] Erro ao enviar a branch para o GitHub.")
+        return
+
+    pr_title = title or f"feat: {current_branch.replace('feat/', '').replace('fix/', '').replace('-', ' ').title()}"
+    pr_body = body or f"Alterações desenvolvidas na branch {current_branch} para colaboração VAIP."
+
+    print(f"[*] Abrindo Pull Request no GitHub...")
+    pr_cmd = f'gh pr create --title "{pr_title}" --body "{pr_body}"'
+    res = os.system(pr_cmd)
+    if res == 0:
+        print("[+] Pull Request criado com sucesso no GitHub!")
+    else:
+        print("[!] Não foi possível criar o PR automaticamente via gh cli.")
+
+
+def setup_hooks():
+    """Instala o git hook de pre-commit que bloqueia commits diretos na main."""
+    hooks_dir = ROOT_DIR / ".git" / "hooks"
+    hooks_dir.mkdir(parents=True, exist_ok=True)
+    pre_commit_file = hooks_dir / "pre-commit"
+
+    hook_script = """#!/bin/sh
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+    echo "=============================================================="
+    echo "⛔ BLOQUEIO VAIP: Commits diretos na branch '$branch' são proibidos!"
+    echo "Trabalho colaborativo Vinicius & Patrik: crie uma branch antes:"
+    echo "  python scripts/vaip.py branch <nome-da-sua-tarefa>"
+    echo "=============================================================="
+    exit 1
+fi
+"""
+    with open(pre_commit_file, "w", encoding="utf-8") as f:
+        f.write(hook_script)
+
+    print("[+] Git Hook de proteção instalado com sucesso em .git/hooks/pre-commit!")
+    print("    Commits acidentais na branch 'main' agora serão bloqueados automaticamente.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="VAIP Master Orchestrator CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -169,6 +239,20 @@ def main():
     # Comando sync
     subparsers.add_parser("sync", help="Sincroniza alterações do repositório do Patrik (upstream)")
 
+    # Comando branch
+    branch_parser = subparsers.add_parser("branch", help="Cria e alterna para uma nova branch protegida")
+    branch_parser.add_argument("name", help="Nome da tarefa (ex: copiloto-vagas)")
+    branch_parser.add_argument("--author", default="vinii", help="Autor da branch (padrao: vinii)")
+    branch_parser.add_argument("--type", default="feat", help="Tipo (feat, fix, docs, chore)")
+
+    # Comando pr
+    pr_parser = subparsers.add_parser("pr", help="Faz push da branch e cria Pull Request no GitHub")
+    pr_parser.add_argument("--title", default=None, help="Título do Pull Request")
+    pr_parser.add_argument("--body", default=None, help="Descrição do Pull Request")
+
+    # Comando setup-hooks
+    subparsers.add_parser("setup-hooks", help="Instala o hook de proteção contra commits na main")
+
     args = parser.parse_args()
 
     if args.command == "status" or not args.command:
@@ -179,6 +263,12 @@ def main():
         register_project(args.name, args.slug, args.desc)
     elif args.command == "sync":
         sync_upstream()
+    elif args.command == "branch":
+        create_branch(args.name, args.author, args.type)
+    elif args.command == "pr":
+        create_pr(args.title, args.body)
+    elif args.command == "setup-hooks":
+        setup_hooks()
 
 
 if __name__ == "__main__":

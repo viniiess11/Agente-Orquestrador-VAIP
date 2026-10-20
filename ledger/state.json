@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-19T17:00:00-03:00",
+  "updated_at": "2026-10-20T18:09:30.492133",
   "version": "1.0.0",
   "master": {
     "name": "VAIP",
@@ -16,16 +16,29 @@
       "discord_channel": "#vagas-dados",
       "schedule": "daily_17:30",
       "target_location": "Mogi das Cruzes, SP / Remoto",
-      "target_roles": ["Analista de Dados", "BI", "Engenheiro de Dados"],
-      "platforms": ["Gupy", "LinkedIn", "InfoJobs", "Catho"],
-      "last_run": "2026-10-19 17:45:00"
+      "target_roles": [
+        "Analista de Dados",
+        "BI",
+        "Engenheiro de Dados"
+      ],
+      "platforms": [
+        "Gupy",
+        "LinkedIn",
+        "InfoJobs",
+        "Catho"
+      ],
+      "last_run": "2026-10-20 18:09:30"
     },
     "PRJ-02": {
       "id": "PRJ-02",
       "slug": "canais-dark-video",
       "name": "Canais Dark (YT / TikTok / Kwai)",
       "status": "structuring",
-      "platforms": ["YouTube Shorts", "TikTok", "Kwai"],
+      "platforms": [
+        "YouTube Shorts",
+        "TikTok",
+        "Kwai"
+      ],
       "niche": "TBD",
       "scripts_ready": 0,
       "videos_rendered": 0
