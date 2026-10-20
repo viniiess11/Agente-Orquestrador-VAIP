@@ -16,34 +16,60 @@
 - **Tarefas do Patrik**: `feat/patrike-<nome-da-funcionalidade>` ou `fix/patrike-...`
 - **Documentação / Configurações**: `docs/vinii-...` ou `chore/vinii-...`
 
-### 🔄 Fluxo Obrigatório de Qualquer Tarefa:
-1. **Sempre iniciar a partir da `main` atualizada**:
-   ```powershell
-   git checkout main
-   git pull origin main
-   git pull upstream main  # puxar atualizações do Patrik se houver
-   ```
-2. **Criar a branch de trabalho**:
-   ```powershell
-   git checkout -b feat/vinii-minha-tarefa
-   # ou via CLI: python scripts/vaip.py branch minha-tarefa
-   ```
-3. **Desenvolver e comitar na branch**:
-   ```powershell
-   git add .
-   git commit -m "feat(modulo): descricao clara da alteracao"
-   ```
-4. **Enviar a branch para o GitHub e abrir Pull Request (PR)**:
-   ```powershell
-   git push -u origin feat/vinii-minha-tarefa
-   gh pr create --title "Minha Feature" --body "Descricao do que foi feito"
-   # ou via CLI: python scripts/vaip.py pr
-   ```
-5. **Merge**: A branch é revisada e mesclada na `main` pelo GitHub sem risco de sobreescrever o trabalho do outro.
+---
+
+## 3. 🔄 Diretrizes Obrigatórias de Trabalho Colaborativo
+
+### 1️⃣ Antes de Iniciar Qualquer Código:
+> **Rode sempre:**
+> ```powershell
+> git checkout main
+> git pull origin main
+> ```
+> *(E, opcionalmente, `git pull upstream main` para trazer commits do repositório do Patrik).*  
+> Isso garante 100% de certeza de que você está partindo da **versão mais recente e estável do projeto**, evitando retrabalho.
+
+### 2️⃣ Criar a Branch de Trabalho:
+```powershell
+git checkout -b feat/vinii-minha-tarefa
+# ou diretamente via CLI:
+python scripts/vaip.py branch minha-tarefa
+```
+
+### 3️⃣ Desenvolver e Comitar na Branch:
+```powershell
+git add .
+git commit -m "feat(modulo): descricao clara da alteracao"
+```
+
+### 4️⃣ Enviar e Abrir Pull Request (PR):
+```powershell
+python scripts/vaip.py pr
+# ou via gh cli:
+git push -u origin feat/vinii-minha-tarefa
+gh pr create --repo viniiess11/Agente-Orquestrador-VAIP --base main --head feat/vinii-minha-tarefa --title "Titulo" --body "Descricao"
+```
+
+### 5️⃣ Se Ocorrer Conflito no Git:
+> Se vocês alterarem exatamente a mesma linha do mesmo arquivo, o Git avisará no Pull Request ou durante o merge:
+> 1. O Git inserirá marcadores no arquivo indicando as duas versões:
+>    ```text
+>    <<<<<<< HEAD (sua versao)
+>    trecho de codigo A
+>    =======
+>    trecho de codigo B (versao do primo)
+>    >>>>>>>
+>    ```
+> 2. Vocês só precisarão **abrir o arquivo localmente**, escolher qual trecho manter (ou combinar os dois), apagar os marcadores (`<<<<<<<`, `=======`, `>>>>>>>`), salvar o arquivo e rodar:
+>    ```powershell
+>    git add <arquivo-resolvido>
+>    git commit -m "fix: resolve merge conflict"
+>    git push
+>    ```
 
 ---
 
-## 3. Segurança (Zero-Leak) e Boas Práticas
+## 4. Segurança (Zero-Leak) e Boas Práticas
 - Nenhuma chave de API, webhook ou segredo pode ser comitado. Sempre utilizar `.env` e variáveis de ambiente.
 - Tarefas pesadas de ETL, scraping ou processamento devem rodar em scripts locais (`scripts/`) via ambiente virtual `.venv` para economizar tokens.
 - O arquivo `.git/hooks/pre-commit` bloqueia qualquer tentativa acidental de commit na `main`.
