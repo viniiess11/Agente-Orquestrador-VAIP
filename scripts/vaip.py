@@ -187,7 +187,7 @@ def create_pr(title: str = None, body: str = None):
     pr_body = body or f"Alterações desenvolvidas na branch {current_branch} para colaboração VAIP."
 
     print(f"[*] Abrindo Pull Request no GitHub...")
-    pr_cmd = f'gh pr create --title "{pr_title}" --body "{pr_body}"'
+    pr_cmd = f'gh pr create --repo viniiess11/Agente-Orquestrador-VAIP --base main --head {current_branch} --title "{pr_title}" --body "{pr_body}"'
     res = os.system(pr_cmd)
     if res == 0:
         print("[+] Pull Request criado com sucesso no GitHub!")
